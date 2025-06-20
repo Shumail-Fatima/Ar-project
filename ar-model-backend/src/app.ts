@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 });
 
 // MongoDB Connection
-mongoose.connect('mongodb+srv://shumailarshadubit:ZUuvYNvQPITgEDQr@cluster0.n6slpns.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+mongoose.connect(process.env.MONGODB_URI!)
   .then(() => {
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
