@@ -4,29 +4,59 @@ import cors from 'cors';
 import modelRoutes from './routes/modelRoutes';
 import path from 'path';
 import dotenv from 'dotenv';
+import fs from 'fs';
+
 dotenv.config();
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
+
+// Create uploads directories if they don't exist
+const uploadsDir = path.join(__dirname, '../uploads');
+const modelsDir = path.join(uploadsDir, 'models');
+const markersDir = path.join(uploadsDir, 'markers');
+
+[uploadsDir, modelsDir, markersDir].forEach(dir => {
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+});
 
 // Middlewares
 app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Serve static files (including index.html)
+app.use(express.static(path.join(__dirname, '../')));
+
 // Routes
 app.use('/api/models', modelRoutes);
 
 // Root route
 app.get('/', (req, res) => {
-  res.send('Welcome to the 3D Model API!');
+  res.sendFile(path.join(__dirname, '../index.html'));
+});
+
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', message: 'AR Model Backend is running' });
 });
 
 // MongoDB Connection
-mongoose.connect(process.env.MONGODB_URI!)
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/ar-models';
+
+mongoose.connect(MONGODB_URI)
   .then(() => {
+    console.log('Connected to MongoDB');
     app.listen(PORT, () => {
       console.log(`Server running on http://localhost:${PORT}`);
+      console.log(`API available at http://localhost:${PORT}/api`);
     });
   })
-  .catch((err) => console.error('MongoDB Error:', err));
+  .catch((err) => {
+    console.error('MongoDB Connection Error:', err);
+    process.exit(1);
+  });
+
+export default app;
