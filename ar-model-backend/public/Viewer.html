@@ -1,0 +1,44 @@
+<!-- File: /public/viewer.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>3D AR Viewer</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-aframe.prod.js"></script>
+  <script src="https://unpkg.com/aframe-gesture-detector@4.0.4/dist/aframe-gesture-detector.min.js"></script>
+</head>
+<body>
+  <div id="loading">Loading AR Scene...</div>
+
+  <a-scene
+    mindar-image="imageTargetSrc: marker.mind; autoStart: true; uiScanning: yes;"
+    embedded
+    color-space="sRGB"
+    renderer="antialias: true; alpha: true"
+    vr-mode-ui="enabled: false"
+    device-orientation-permission-ui="enabled: true">
+
+    <a-assets>
+      <a-asset-item id="modelGLB" response-type="arraybuffer"></a-asset-item>
+    </a-assets>
+
+    <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+    <a-entity mindar-image-target="targetIndex: 0">
+      <a-entity
+        id="model"
+        gltf-model="#modelGLB"
+        scale="0.5 0.5 0.5"
+        position="0 0 0"
+        rotation="0 0 0"
+        gesture-handler>
+      </a-entity>
+    </a-entity>
+  </a-scene>
+
+  <script src="viewer.js"></script>
+</body>
+</html>

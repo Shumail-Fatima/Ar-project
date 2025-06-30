@@ -1,0 +1,34 @@
+<!-- File: /public/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebAR-Based Architectural Visualization</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="homepage">
+  <div class="overlay">
+    <div class="container">
+      <h1>WebAR-Based Architectural Visualization</h1>
+      <p>Choose a floor plan or blueprint to explore its 3D model in augmented reality:</p>
+
+      <label for="markerSelect"><strong>Select Design:</strong></label><br />
+      <select id="markerSelect">
+        <option value="floorplan-001">Floor Plan A - Ground Layout</option>
+        <option value="blueprint-002">Blueprint B - Elevation View</option>
+      </select>
+
+      <br />
+      <button onclick="startAR()">Start Augmented Reality</button>
+    </div>
+  </div>
+
+  <script>
+    function startAR() {
+      const markerId = document.getElementById('markerSelect').value;
+      window.location.href = `viewer.html?marker=${markerId}`;
+    }
+  </script>
+</body>
+</html>

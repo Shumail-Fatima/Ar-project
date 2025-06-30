@@ -1,0 +1,86 @@
+<!-- File: /public/upload.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Upload 3D Model</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Upload 3D Model with Marker</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+      <label>Model File (.glb/.gltf):</label>
+      <input type="file" name="modelFile" accept=".glb,.gltf" required><br>
+
+      <label>Marker File (.mind):</label>
+      <input type="file" name="markerFile" accept=".mind" required><br>
+
+      <label>Name:</label>
+      <input type="text" name="name" required><br>
+
+      <label>Description:</label>
+      <input type="text" name="description" required><br>
+
+      <label>Category:</label>
+      <select name="category">
+        <option value="architecture">Architecture</option>
+        <option value="furniture">Furniture</option>
+        <option value="electronics">Electronics</option>
+        <option value="vehicles">Vehicles</option>
+        <option value="art">Art</option>
+        <option value="other">Other</option>
+      </select><br>
+
+      <label>Position (x,y,z):</label>
+      <input type="text" name="position" placeholder="0,0,0"><br>
+
+      <label>Scale (x,y,z):</label>
+      <input type="text" name="scale" placeholder="1,1,1"><br>
+
+      <label>Rotation (x,y,z):</label>
+      <input type="text" name="rotation" placeholder="0,0,0"><br>
+
+      <label>Target Index:</label>
+      <input type="number" name="targetIndex" required><br>
+
+      <button type="submit">Upload</button>
+    </form>
+
+    <div id="uploadStatus"></div>
+  </div>
+
+  <script>
+    const form = document.getElementById('uploadForm');
+    const statusDiv = document.getElementById('uploadStatus');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+
+      // Convert comma-separated values to JSON strings
+      ['position', 'scale', 'rotation'].forEach((field) => {
+        const value = form[field].value;
+        if (value) {
+          const [x, y, z] = value.split(',').map(Number);
+          formData.set(field, JSON.stringify({ x, y, z }));
+        }
+      });
+
+      try {
+        const res = await fetch('/api/models/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error);
+        statusDiv.textContent = 'Upload successful!';
+      } catch (err) {
+        statusDiv.textContent = 'Error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
