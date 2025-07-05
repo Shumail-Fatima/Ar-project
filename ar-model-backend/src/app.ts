@@ -43,6 +43,8 @@ app.get('/view-model', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/view-model.html'));
 });
 
+
+
 app.use('/api/marker', markerRoutes);
 
 // Serve static files (including index.html)

@@ -4,6 +4,12 @@ export interface IModel3D extends Document {
   name: string;
   category: string;
   description: string;
+  // Add these:
+  markerFile?: Buffer;
+  markerMime?: string;
+  modelFile?: Buffer;
+  modelMime?: string;
+
   modelUrl: string;
   markerUrl: string;
   position: {
@@ -44,6 +50,13 @@ const model3DSchema = new Schema<IModel3D>({
     required: true,
     trim: true
   },
+  // Add these for binary storage:
+  markerFile: { type: Buffer }, // .mind file
+  markerMime: { type: String, default: 'application/octet-stream' },
+  modelFile: { type: Buffer }, // .gltf or .glb
+  modelMime: { type: String, default: 'model/gltf-binary' 
+  },
+  
   modelUrl: {
     type: String,
     required: true

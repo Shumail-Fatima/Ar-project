@@ -1,8 +1,11 @@
 
-import express from 'express';
+import express, { Request, Response } from 'express';
 import { uploadCombined } from '../middleware/upload';
 import Model3D from '../models/Model3D';
 import { IModel3D } from '../models/Model3D';
+import path from 'path';
+import fs from 'fs';
+import { promisify } from 'util';
 
 const router = express.Router();
 
@@ -52,6 +55,21 @@ router.post('/upload', uploadCombined.fields([
     res.status(500).json({ 
       error: err instanceof Error ? err.message : 'Internal server error' 
     });
+  }
+});
+
+// Serve model (.gltf/.glb) file by targetIndex
+router.get('/model/:targetIndex', async (req, res): Promise<any> => {
+  try {
+    const model = await Model3D.findOne({ targetIndex: parseInt(req.params.targetIndex) });
+    if (!model || !model.modelFile) {
+      return res.status(404).send('Model not found');
+    }
+    res.set('Content-Type', model.modelMime || 'model/gltf-binary');
+    res.send(model.modelFile);
+  } catch (err) {
+    console.error('Serve model error:', err);
+    res.status(500).send('Internal server error');
   }
 });
 
@@ -177,5 +195,6 @@ router.patch('/:id/toggle', async (req, res) => {
     });
   }
 });
+
 
 export default router;
