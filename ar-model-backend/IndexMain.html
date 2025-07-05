@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>WebAR 2D to 3D Projection</title>
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+    #loading {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      background-color: rgba(0, 0, 0, 0.8);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+  <div id="loading">Loading AR Experience...</div>
+
+  <div id="scene-container"></div>
+
+  <script type="module">
+    import { modelService } from './js/modelService.js';
+
+    async function initAR() {
+      try {
+        const loading = document.getElementById('loading');
+        loading.style.display = 'flex';
+
+        const models = await modelService.getAllModels();
+
+        if (!models || models.length === 0) {
+          loading.innerText = 'No models found in database';
+          return;
+        }
+
+        const firstMarker = models[0].markerUrl;
+        const markerPath = `/api/marker/${firstMarker.split('/').pop()}`;
+        console.log('Using marker:', markerPath);
+
+        // Build <a-scene> with correct marker URL
+        const sceneHtml = `
+          <a-scene
+            mindar-image="imageTargetSrc: ${markerPath}; autoStart: true;"
+            embedded
+            color-space="sRGB"
+            renderer="colorManagement: true, physicallyCorrectLights"
+            vr-mode-ui="enabled: false"
+            device-orientation-permission-ui="enabled: true"
+            id="ar-scene">
+            
+            <a-assets id="assets">
+              ${models.map(model => `
+                <a-asset-item id="model-${model._id}" src="${model.modelUrl}"></a-asset-item>
+              `).join('')}
+            </a-assets>
+
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+            <a-light type="ambient" intensity="1"></a-light>
+
+            ${models.map(model => `
+              <a-entity mindar-image-target="targetIndex: ${model.targetIndex}">
+                <a-gltf-model
+                  src="#model-${model._id}"
+                  position="${model.position.x} ${model.position.y} ${model.position.z}"
+                  scale="${model.scale.x} ${model.scale.y} ${model.scale.z}"
+                  rotation="${model.rotation.x} ${model.rotation.y} ${model.rotation.z}">
+                </a-gltf-model>
+              </a-entity>
+            `).join('')}
+
+          </a-scene>
+        `;
+
+        document.getElementById('scene-container').innerHTML = sceneHtml;
+
+        // Wait until scene is ready
+        document.querySelector('a-scene').addEventListener('loaded', () => {
+          loading.style.display = 'none';
+        });
+      } catch (err) {
+        console.error('AR Init Error:', err);
+        document.getElementById('loading').innerText = 'Failed to load AR experience';
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', initAR);
+  </script>
+</body>
+</html>

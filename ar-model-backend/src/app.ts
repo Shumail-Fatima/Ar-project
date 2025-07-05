@@ -5,6 +5,7 @@ import modelRoutes from './routes/modelRoutes';
 import path from 'path';
 import dotenv from 'dotenv';
 import fs from 'fs';
+import markerRoutes from './routes/markerRoutes';
 
 dotenv.config();
 
@@ -27,6 +28,18 @@ app.use(cors());
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// ✅ Add this line to serve /public/js/modelService.js
+app.use(express.static(path.join(__dirname, '../public')));
+// Serve static files (including index.html)
+app.use(express.static(path.join(__dirname, '../')));
+
+// Route to serve the upload form
+app.get('/upload', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/upload.html'));
+});
+
+app.use('/api/marker', markerRoutes);
+
 // Serve static files (including index.html)
 app.use(express.static(path.join(__dirname, '../')));
 
@@ -35,7 +48,7 @@ app.use('/api/models', modelRoutes);
 
 // Root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../index.html'));
+  res.sendFile(path.join(__dirname, '../IndexMain.html'));
 });
 
 // Health check endpoint
