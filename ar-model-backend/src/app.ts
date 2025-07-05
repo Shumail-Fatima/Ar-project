@@ -43,6 +43,9 @@ app.get('/view-model', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/view-model.html'));
 });
 
+app.get('/viewer', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/Viewer.html'));
+})
 
 
 app.use('/api/marker', markerRoutes);
