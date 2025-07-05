@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View 3D Model Details</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 2em; }
+    .container { max-width: 600px; margin: auto; }
+    .details { margin-top: 2em; padding: 1em; border: 1px solid #ccc; border-radius: 8px; }
+    label { font-weight: bold; }
+    select { width: 100%; padding: 0.5em; }
+    .field { margin-bottom: 1em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>View 3D Model Details</h1>
+    <div class="field">
+      <label for="modelSelect">Select a Model:</label>
+      <select id="modelSelect">
+        <option value="">-- Choose a model --</option>
+      </select>
+    </div>
+    <div id="modelDetails" class="details" style="display:none;"></div>
+  </div>
+  <script>
+    const modelSelect = document.getElementById('modelSelect');
+    const modelDetails = document.getElementById('modelDetails');
+    let models = [];
+
+    // Fetch all models from the API
+    fetch('/api/models')
+      .then(res => res.json())
+      .then(data => {
+        models = data;
+        data.forEach(model => {
+          const option = document.createElement('option');
+          option.value = model._id;
+          option.textContent = model.name || model._id;
+          modelSelect.appendChild(option);
+        });
+      });
+
+    modelSelect.addEventListener('change', () => {
+      const id = modelSelect.value;
+      if (!id) {
+        modelDetails.style.display = 'none';
+        modelDetails.innerHTML = '';
+        return;
+      }
+      // Fetch the selected model's details
+      fetch(`/api/models/${id}`)
+        .then(res => res.json())
+        .then(model => {
+          modelDetails.style.display = 'block';
+          modelDetails.innerHTML = `
+            <div><label>Name:</label> ${model.name || ''}</div>
+            <div><label>Description:</label> ${model.description || ''}</div>
+            <div><label>Category:</label> ${model.category || ''}</div>
+            <div><label>Position:</label> ${model.position ? JSON.stringify(model.position) : ''}</div>
+            <div><label>Scale:</label> ${model.scale ? JSON.stringify(model.scale) : ''}</div>
+            <div><label>Rotation:</label> ${model.rotation ? JSON.stringify(model.rotation) : ''}</div>
+            <div><label>Target Index:</label> ${model.targetIndex || ''}</div>
+            <div><label>Model File:</label> ${model.modelUrl ? `<a href="${model.modelUrl}" target="_blank">Download</a>` : ''}</div>
+            <div><label>Marker File:</label> ${model.markerUrl ? `<a href="${model.markerUrl}" target="_blank">Download</a>` : ''}</div>
+          `;
+        });
+    });
+  </script>
+</body>
+</html>
